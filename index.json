@@ -1,0 +1,62 @@
+[
+  {
+    "name": "爱看漫",
+    "fileName": "ikm.js",
+    "key": "ikmmh",
+    "version": "2.0.0"
+  },
+  {
+    "name": "漫画源02",
+    "fileName": "source_02.js",
+    "key": "source_02",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源03",
+    "fileName": "source_03.js",
+    "key": "source_03",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源04",
+    "fileName": "source_04.js",
+    "key": "source_04",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源05",
+    "fileName": "source_05.js",
+    "key": "source_05",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源06",
+    "fileName": "source_06.js",
+    "key": "source_06",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源07",
+    "fileName": "source_07.js",
+    "key": "source_07",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源08",
+    "fileName": "source_08.js",
+    "key": "source_08",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源09",
+    "fileName": "source_09.js",
+    "key": "source_09",
+    "version": "1.0.0"
+  },
+  {
+    "name": "漫画源10",
+    "fileName": "source_10.js",
+    "key": "source_10",
+    "version": "1.0.0"
+  }
+]
