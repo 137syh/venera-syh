@@ -28,7 +28,7 @@ function needPassValidator(htmlString) {
 }
 
 class Ikm extends ComicSource {
-    name = "爱看漫-syh";
+    name = "爱看漫";
     key = "ikmmh";
     version = "2.1.0";  // 版本号更新
     minAppVersion = "1.0.0";
