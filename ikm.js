@@ -30,7 +30,7 @@ function needPassValidator(htmlString) {
 class Ikm extends ComicSource {
     name = "爱看漫-syh";
     key = "ikmmh";
-    version = "2.0.0";  // 版本号更新
+    version = "2.1.0";  // 版本号更新
     minAppVersion = "1.0.0";
     url = "https://git.nyne.dev/nyne/venera-configs/raw/branch/main/ikmmh.js";
 
@@ -332,9 +332,15 @@ class Ikm extends ComicSource {
                 if (needPassValidator(res.body)) {
                     res = await Network.get(epId, Ikm.webHeaders);
                 }
+                if (res.status !== 200) {
+                    throw new Error(`章节页请求失败，状态码：${res.status}`);
+                }
 
-                // 从页面中提取章节ID (cid)
-                const cidMatch = res.body.match(/data-chapter-id=["'](\d+)["']/);
+                // 从页面中提取章节ID (cid)，兼容 data-chapter-id 与 read 变量两种来源
+                let cidMatch = res.body.match(/data-chapter-id=["'](\d+)["']/);
+                if (!cidMatch) {
+                    cidMatch = res.body.match(/cid:\s*['"]?(\d+)['"]?/);
+                }
                 if (!cidMatch) {
                     throw new Error("无法从页面中获取章节ID (cid)");
                 }
@@ -359,7 +365,9 @@ class Ikm extends ComicSource {
                 // 步骤3: 循环调用图片API获取所有图片
                 let allImages = [];
                 let offset = 0;
-                const limit = 20; // 每次请求20张图片，可根据需要调整
+                const limit = 20; // 每次请求20张图片（服务端实际固定返回10张，以实际返回数为准）
+                let emptyPageCount = 0; // 连续空页计数，用于容错
+                const maxEmptyPages = 2;
 
                 // 循环获取所有图片
                 while (true) {
@@ -394,25 +402,42 @@ class Ikm extends ComicSource {
                         return null;
                     }).filter(url => url !== null);
 
-                    // 将图片添加到总列表
+                    // 将图片添加到总列表（用Set去重，防止服务端返回重复图片）
                     allImages = allImages.concat(images);
+                    allImages = Array.from(new Set(allImages));
 
                     // 检查是否获取完所有图片
                     if (picData.data.total !== undefined) {
                         totalImages = picData.data.total;
                     }
                     
-                    // 如果已经获取的图片数量达到总数，或者本次请求没有返回图片，则退出循环
-                    if (allImages.length >= totalImages || images.length === 0) {
-                        break;
+                    // 如果本次请求没有返回图片，则计数；连续多次空页才退出（兼容服务端偶发空响应）
+                    if (images.length === 0) {
+                        emptyPageCount++;
+                        if (emptyPageCount >= maxEmptyPages) {
+                            break;
+                        }
+                        offset += limit;
+                        continue;
                     }
+                    emptyPageCount = 0;
 
                     // 更新偏移量，准备获取下一批图片
-                    offset += limit;
+                    // 注意：服务端会忽略limit参数，固定每页返回10条，
+                    // 必须用实际返回的图片数步进，否则会跳过中间页导致图片缺失
+                    offset += images.length;
+
+                    // 如果已经获取的图片数量达到总数，则退出循环
+                    if (allImages.length >= totalImages) {
+                        break;
+                    }
                 }
 
                 if (allImages.length === 0) {
                     throw new Error("未能获取到任何图片");
+                }
+                if (totalImages > 0 && allImages.length < totalImages) {
+                    console.log(`章节图片不完整：已获取 ${allImages.length}/${totalImages}`);
                 }
 
                 // 步骤4: 返回图片列表
