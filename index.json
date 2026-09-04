@@ -44,7 +44,7 @@
   },
   {
     "name": "漫画源08",
-    "fileName": "source_08.js",
+    "url": "https://cdn.jsdelivr.net/gh/venera-app/venera-configs@main/jm.js",
     "key": "source_08",
     "version": "1.0.0"
   },
