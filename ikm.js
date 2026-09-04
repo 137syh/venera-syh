@@ -30,7 +30,7 @@ function needPassValidator(htmlString) {
 class Ikm extends ComicSource {
     name = "爱看漫";
     key = "ikmmh";
-    version = "2.1.0";
+    version = "2.1.1";
     minAppVersion = "1.0.0";
     url = "https://137syh.github.io/venera-syh/ikm.js";
 
