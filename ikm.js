@@ -30,11 +30,11 @@ function needPassValidator(htmlString) {
 class Ikm extends ComicSource {
     name = "爱看漫";
     key = "ikmmh";
-    version = "2.1.1";
+    version = "2.1.2";
     minAppVersion = "1.0.0";
     url = "https://137syh.github.io/venera-syh/ikm.js";
 
-    static baseUrl = "https://ymcdnyfqdapp.ikmmh.com";
+    static baseUrl = "https://www.ikmmh.com";
     static Mobile_UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1 Edg/140.0.0.0";
     static webHeaders = {
         "User-Agent": Ikm.Mobile_UA,
@@ -67,7 +67,7 @@ class Ikm extends ComicSource {
                 throw new Error(`登录失败：${err.message}`);
             }
         },
-        logout: () => Network.deleteCookies("ymcdnyfqdapp.ikmmh.com"),
+        logout: () => Network.deleteCookies("www.ikmmh.com"),
         registerWebsite: `${Ikm.baseUrl}/user/register/`,
     };
 
