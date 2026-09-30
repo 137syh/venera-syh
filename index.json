@@ -32,9 +32,9 @@
   },
   {
     "name": "漫画源06",
-    "fileName": "source_06.js",
-    "key": "source_06",
-    "version": "1.0.0"
+    "url": "https://cdn.jsdelivr.net/gh/venera-app/venera-configs@main/jm.js",
+    "key": "jm",
+    "version": "2.0.16"
   },
   {
     "name": "漫画源07",
