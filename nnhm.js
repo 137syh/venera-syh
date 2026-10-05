@@ -3,7 +3,7 @@ class NiaoNiaoHanMan extends ComicSource {
     key = "nnhm";
     version = "1.3.0";
     minAppVersion = "1.5.0";
-    url = "";
+    url = "https://137syh.github.io/venera-syh/nnhm.js";
 
     settings = {
         domains: {
