@@ -10,9 +10,9 @@ class AiManDao extends ComicSource {
             title: "主域名",
             type: "select",
             options: [
-                { value: "amdcomic-plus.vip", text: "amdcomic-plus.vip" },
-                { value: "amdcomic.xyz", text: "amdcomic.xyz" },
-                { value: "amdcomic.com", text: "amdcomic.com" },
+                { value: "amdcomic-plus.vip", text: "大陆优化" },
+                { value: "amdcomic.com", text: "主线路" },
+                { value: "amdcomic.xyz", text: "备用线路" },
             ],
             default: "amdcomic-plus.vip",
         },
