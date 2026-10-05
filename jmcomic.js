@@ -2,7 +2,7 @@ class JM extends ComicSource {
     name = "禁漫天堂X"
     key = "jmx"
     version = "2.1.0"
-    minAppVersion = "1.16.0"
+    minAppVersion = "1.6.0"
 
     static jmVersion = "2.1.7"
     static jmPkgName = "com.example.app"
