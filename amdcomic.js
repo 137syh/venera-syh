@@ -1,7 +1,7 @@
 class AiManDao extends ComicSource {
     name = "爱漫岛";
     key = "aiman";
-    version = "2.0.0";
+    version = "2.3.6";
     minAppVersion = "1.4.0";
     url = "https://137syh.github.io/venera-syh/amdcomic.js";
 
@@ -23,10 +23,20 @@ class AiManDao extends ComicSource {
         return `https://www.${domain}`;
     }
 
-    static headers = {
+    static baseHeaders = {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
         "Referer": "https://www.amdcomic-plus.vip/",
     };
+
+    // 获取请求头（自动附带 cookies）
+    getHeaders() {
+        let headers = { ...AiManDao.baseHeaders };
+        let cookies = this.loadData("cookies") || "";
+        if (cookies.trim()) {
+            headers["Cookie"] = cookies.trim();
+        }
+        return headers;
+    }
 
     // 通用解析：从元素提取 Comic 对象
     parseComicFromElement(e) {
@@ -45,6 +55,14 @@ class AiManDao extends ComicSource {
             titleElem = e.querySelector("div.ranklist_txt h4.title a") || e.querySelector("div.ranklist_txt h4.title");
             title = titleElem ? titleElem.text.trim() : "";
         }
+        if (!title) {
+            title = linkElem.attributes["title"] || "";
+        }
+        if (!title) {
+            let subElem = e.querySelector("p.vodlist_sub");
+            if (subElem) title = subElem.text.trim();
+        }
+        if (!title) return null;
         let subTitle = e.querySelector("p.vodlist_sub")?.text.trim() || "";
         return new Comic({ id, title, cover, subTitle });
     }
@@ -107,7 +125,7 @@ class AiManDao extends ComicSource {
             title: this.name,
             type: "singlePageWithMultiPart",
             load: async () => {
-                let res = await Network.get(this.baseUrl, AiManDao.headers);
+                let res = await Network.get(this.baseUrl, this.getHeaders());
                 if (res.status !== 200) throw `请求失败：${res.status}`;
                 let doc = new HtmlDocument(res.body);
                 let parts = doc.querySelectorAll("div.vod_row");
@@ -126,75 +144,80 @@ class AiManDao extends ComicSource {
                 }
                 return result;
             },
-            onThumbnailLoad: (url) => ({ url, headers: AiManDao.headers }),
+            onThumbnailLoad: (url) => ({ url, headers: this.getHeaders() }),
         },
     ];
 
-    // 分类 - 增强版：支持主分类、子分类、排序、年份
+    // 分类
     category = {
         title: this.name,
         parts: [
             {
-                name: "主分类",
+                name: "分类",
                 type: "fixed",
                 categories: ["同人", "单本", "短篇", "韩漫"],
                 itemType: "category",
                 categoryParams: ["1", "2", "3", "4"],
             },
-            {
-                name: "子分类",
-                type: "fixed",
-                categories: ["全部", "校园", "幻想", "都市", "搞笑"],
-                itemType: "subCategory",
-                categoryParams: ["", "6", "7", "8", "9"],
-            },
-            {
-                name: "排序",
-                type: "fixed",
-                categories: ["最新", "最热", "评分"],
-                itemType: "order",
-                categoryParams: ["time", "hits", "score"],
-            },
-            {
-                name: "年份",
-                type: "fixed",
-                categories: ["全部", "2025", "2024", "2023", "2022", "2021", "2020"],
-                itemType: "year",
-                categoryParams: ["", "2025", "2024", "2023", "2022", "2021", "2020"],
-            },
         ],
         enableRankingPage: false,
     };
 
-    // 构建分类 URL
-    buildCategoryUrl(mainId, subId, order, year, page) {
-        let id = subId || mainId;
-        let url = `${this.baseUrl}/vodshow/${id}`;
-        if (order) {
-            url += `--${order}`;
-        } else {
-            url += `--time`;
-        }
-        url += `--------`;
-        if (year) {
-            url += year;
-        }
-        if (page > 1) {
-            url += `---${page}---`;
-        }
-        url += `.html`;
-        return url;
-    }
-
     // 分类漫画加载
     categoryComics = {
+        // options: [子分类, 排序, 年份]
+        optionList: [
+            {
+                label: "子分类",
+                options: [
+                    "-全部",
+                    "6-校园",
+                    "7-幻想",
+                    "8-都市",
+                    "9-搞笑",
+                ],
+            },
+            {
+                label: "排序",
+                options: [
+                    "time-最新",
+                    "hits-最热",
+                    "score-评分",
+                ],
+            },
+            {
+                label: "年份",
+                options: [
+                    "-全部",
+                    "2025-2025",
+                    "2024-2024",
+                    "2023-2023",
+                    "2022-2022",
+                    "2021-2021",
+                    "2020-2020",
+                ],
+            },
+        ],
+
         load: async (category, param, options, page) => {
-            let mainId = options["主分类"] || "1";
-            let subId = options["子分类"] || "";
-            let order = options["排序"] || "time";
-            let year = options["年份"] || "";
-            let url = this.buildCategoryUrl(mainId, subId, order, year, page);
-            let res = await Network.get(url, AiManDao.headers);
+            let mainId = param || "1";
+            let subId = options[0]?.split("-")[0] || "";
+            let order = options[1]?.split("-")[0] || "time";
+            let year = options[2]?.split("-")[0] || "";
+
+            // 苹果CMS URL: /vodshow/{id}-{area}-{by}-{class}-{lang}-{letter}-{level}-{page}-{year}.html
+            // 12个字段, 11个-分隔
+            // [0]=id, [2]=order, [8]=page, [11]=year
+            let id = subId || mainId;
+            let fields = new Array(12).fill("");
+            fields[0] = id;
+            fields[2] = order;
+            fields[8] = page > 1 ? page.toString() : "";
+            fields[11] = year;
+
+            let url = `${this.baseUrl}/vodshow/${fields.join("-")}.html`;
+
+            let res = await Network.get(url, this.getHeaders());
             if (res.status !== 200) throw `分类请求失败：${res.status}`;
             let doc = new HtmlDocument(res.body);
             let comics = doc.querySelectorAll("li.vodlist_item")
@@ -206,10 +229,13 @@ class AiManDao extends ComicSource {
             for (let a of pageLinks) {
                 let href = a.attributes["href"];
                 if (href && href.includes("/vodshow/")) {
-                    let match = href.match(/---(\d+)---/);
-                    if (match) {
-                        let p = parseInt(match[1]);
-                        if (p > maxPage) maxPage = p;
+                    let mid = href.replace(/\/vodshow\//, '').replace(/\.html$/, '');
+                    let segs = mid.split('-');
+                    for (let i = 1; i < segs.length; i++) {
+                        let n = parseInt(segs[i]);
+                        if (!isNaN(n) && n > maxPage && segs[i] === n.toString()) {
+                            maxPage = n;
+                        }
                     }
                 }
             }
@@ -220,7 +246,7 @@ class AiManDao extends ComicSource {
             }
             return { comics, maxPage };
         },
-        onThumbnailLoad: (url) => ({ url, headers: AiManDao.headers }),
+        onThumbnailLoad: (url) => ({ url, headers: this.getHeaders() }),
     };
 
     // 搜索
@@ -228,7 +254,7 @@ class AiManDao extends ComicSource {
         load: async (keyword, options, page) => {
             let encodedKeyword = encodeURIComponent(keyword);
             let url = `${this.baseUrl}/vodsearch/${encodedKeyword}----------${page}---/`;
-            let res = await Network.get(url, AiManDao.headers);
+            let res = await Network.get(url, this.getHeaders());
             if (res.status !== 200) throw `搜索失败：${res.status}`;
             let doc = new HtmlDocument(res.body);
             let comics = doc.querySelectorAll("li.searchlist_item")
@@ -267,7 +293,7 @@ class AiManDao extends ComicSource {
             }
             return { comics, maxPage };
         },
-        onThumbnailLoad: (url) => ({ url, headers: AiManDao.headers }),
+        onThumbnailLoad: (url) => ({ url, headers: this.getHeaders() }),
     };
 
     // 漫画详情
@@ -275,7 +301,7 @@ class AiManDao extends ComicSource {
         loadInfo: async (id) => {
             if (!id) throw "漫画ID不能为空";
             let url = `${this.baseUrl}/voddetail/${id}/`;
-            let res = await Network.get(url, AiManDao.headers);
+            let res = await Network.get(url, this.getHeaders());
             if (res.status !== 200) throw `详情请求失败：${res.status}`;
             let doc = new HtmlDocument(res.body);
 
@@ -332,6 +358,14 @@ class AiManDao extends ComicSource {
                 .map(e => this.parseComicFromElement(e))
                 .filter(c => c !== null);
 
+            // 检测是否已收藏：mac_ulog 按钮是否有 disabled class
+            let isFavorite = false;
+            let favBtn = doc.querySelector("a.mac_ulog");
+            if (favBtn) {
+                let className = favBtn.attributes["class"] || "";
+                isFavorite = className.includes("disabled");
+            }
+
             return new ComicDetails({
                 title: title,
                 cover: cover,
@@ -344,13 +378,14 @@ class AiManDao extends ComicSource {
                 chapters: chapters,
                 recommend: recommend,
                 updateTime: updateTime,
+                isFavorite: isFavorite,
             });
         },
-        onThumbnailLoad: (url) => ({ url, headers: AiManDao.headers }),
+        onThumbnailLoad: (url) => ({ url, headers: this.getHeaders() }),
 
         loadEp: async (comicId, epId) => {
             let url = epId.startsWith("http") ? epId : `${this.baseUrl}${epId}`;
-            let res = await Network.get(url, AiManDao.headers);
+            let res = await Network.get(url, this.getHeaders());
             if (res.status !== 200) throw `章节请求失败：${res.status}`;
             let html = res.body;
 
@@ -391,52 +426,153 @@ class AiManDao extends ComicSource {
         },
         onImageLoad: (url, comicId, epId) => ({
             url,
-            headers: { ...AiManDao.headers, "Referer": epId },
+            headers: { ...this.getHeaders(), "Referer": epId },
         }),
     };
 
-    // 账号登录
+    // 账号登录（仅支持 cookies，因为 CF 拦截了账密登录接口）
     account = {
-        login: async (account, pwd) => {
-            let url = `${this.baseUrl}/index.php/user/ajax_login.html`;
-            let body = `user_name=${encodeURIComponent(account)}&user_pwd=${encodeURIComponent(pwd)}`;
-            let res = await Network.post(url, {
-                ...AiManDao.headers,
-                "Content-Type": "application/x-www-form-urlencoded",
-                "X-Requested-With": "XMLHttpRequest",
-            }, body);
-            if (res.status !== 200) {
-                throw `登录请求失败：${res.status}`;
-            }
-            let result;
-            try {
-                result = JSON.parse(res.body);
-            } catch (e) {
-                throw "登录响应解析失败";
-            }
-            if (result.code === 1 || result.msg === "登录成功") {
-                let cookies = res.headers["set-cookie"] || res.headers["Set-Cookie"] || [];
-                if (typeof cookies === "string") cookies = [cookies];
-                this.saveData("cookies", cookies.join("; "));
-                return true;
-            } else {
-                throw result.msg || "登录失败";
-            }
+        loginWithCookies: {
+            fields: ["cookies"],
+            validate: async (cookies) => {
+                let cookieStr = (cookies[0] || "").trim();
+                if (!cookieStr) return false;
+                let res = await Network.get(`${this.baseUrl}/index.php/user.html`, {
+                    ...AiManDao.baseHeaders,
+                    "Cookie": cookieStr,
+                });
+                if (res.status === 200 && (res.body.includes("会员中心") || res.body.includes("上次登录"))) {
+                    this.saveData("cookies", cookieStr);
+                    return true;
+                }
+                return false;
+            },
         },
         logout: async () => {
             this.deleteData("cookies");
         },
-        checkLogin: async () => {
-            let cookies = this.loadData("cookies");
-            if (!cookies) return false;
-            let url = `${this.baseUrl}/index.php/user.html`;
-            let res = await Network.get(url, {
-                ...AiManDao.headers,
-                "Cookie": cookies,
-            });
-            return res.status === 200 && !res.body.includes("登录") && !res.body.includes("login");
-        },
     };
 
-    favorites = null;
+    favorites = {
+        multiFolder: false,
+        addOrDelFavorite: async (comicId, folderId, isAdding, favoriteId) => {
+            if (isAdding) {
+                // 添加收藏：GET /index.php/user/ajax_ulog/?ac=set&mid=1&id={id}&type=2
+                let url = `${this.baseUrl}/index.php/user/ajax_ulog/?ac=set&mid=1&id=${encodeURIComponent(comicId)}&type=2`;
+                let res = await Network.get(url, this.getHeaders());
+                if (res.status !== 200) throw `操作失败：${res.status}`;
+                let result;
+                try {
+                    result = JSON.parse(res.body);
+                } catch (e) {
+                    throw "响应解析失败";
+                }
+                if (result.code === 1 || result.msg === "ok") {
+                    return "ok";
+                } else {
+                    throw result.msg || "操作失败";
+                }
+            } else {
+                // 删除收藏：POST /index.php/user/ulog_del.html，参数 ids={id}&type=2&all=0
+                let url = `${this.baseUrl}/index.php/user/ulog_del.html`;
+                let headers = this.getHeaders();
+                headers["Content-Type"] = "application/x-www-form-urlencoded";
+                headers["X-Requested-With"] = "XMLHttpRequest";
+                let body = `ids=${encodeURIComponent(comicId)}&type=2&all=0`;
+                let res = await Network.post(url, headers, body);
+                if (res.status !== 200) throw `删除失败：${res.status}`;
+                let result;
+                try {
+                    result = JSON.parse(res.body);
+                } catch (e) {
+                    throw "响应解析失败: " + res.body.substring(0, 200);
+                }
+                if (result.code == 1 || result.msg === "ok") {
+                    return "ok";
+                } else {
+                    throw result.msg || "删除失败";
+                }
+            }
+        },
+        loadFolders: async (comicId) => {
+            let favorited = [];
+            if (comicId) {
+                // 检查该漫画是否已收藏：请求 favs.html 查找对应 ID
+                let url = `${this.baseUrl}/index.php/user/favs.html`;
+                let res = await Network.get(url, this.getHeaders());
+                if (res.status === 200 && !res.body.includes("未登录")) {
+                    let doc = new HtmlDocument(res.body);
+                    let items = doc.querySelectorAll("ul.data__list li.data__item");
+                    for (let item of items) {
+                        let linkElem = item.querySelector("div.data__img a") || item.querySelector("a");
+                        if (!linkElem) continue;
+                        let link = linkElem.attributes["href"] || "";
+                        let idMatch = link.match(/\/voddetail\/(\d+)\.html/);
+                        if (idMatch && idMatch[1] === comicId) {
+                            favorited.push("0");
+                            break;
+                        }
+                    }
+                }
+            }
+            return {
+                folders: { "0": "全部" },
+                favorited: favorited,
+            };
+        },
+        loadComics: async (page, folder) => {
+            // 使用 favs.html 页面解析收藏列表
+            let url = `${this.baseUrl}/index.php/user/favs.html?page=${page}`;
+            let res = await Network.get(url, this.getHeaders());
+            if (res.status !== 200) throw `加载失败：${res.status}`;
+            if (res.body.includes("login.html") || res.body.includes("未登录")) throw "Login expired";
+            let doc = new HtmlDocument(res.body);
+            // 解析 ul.data__list > li.data__item
+            let items = doc.querySelectorAll("ul.data__list li.data__item");
+            let comics = [];
+            for (let item of items) {
+                // 提取链接 /voddetail/195114.html
+                let linkElem = item.querySelector("div.data__img a") || item.querySelector("div.data__txt h4 a") || item.querySelector("a");
+                if (!linkElem) continue;
+                let link = linkElem.attributes["href"] || "";
+                let idMatch = link.match(/\/voddetail\/(\d+)\.html/);
+                if (!idMatch) continue;
+                let id = idMatch[1];
+                // 提取标题
+                let titleElem = item.querySelector("div.data__txt h4 a") || item.querySelector("h4 a");
+                let title = titleElem ? (titleElem.text || "").trim() : "未知";
+                // 提取封面
+                let thumbElem = item.querySelector("div.data__img a");
+                let cover = thumbElem ? (thumbElem.attributes["data-original"] || thumbElem.attributes["src"] || "") : "";
+                // 提取备注信息
+                let infoElems = item.querySelectorAll("div.data__txt p");
+                let subTitle = "";
+                for (let p of infoElems) {
+                    let text = (p.text || "").trim();
+                    if (text.includes("类型：")) {
+                        subTitle = text.replace("类型：", "").trim();
+                        break;
+                    }
+                }
+                let comic = new Comic({
+                    id: id,
+                    title: title,
+                    subTitle: subTitle,
+                    cover: cover,
+                    tags: [],
+                    description: "",
+                });
+                comics.push(comic);
+            }
+            // 分页：查找 .member-page 中的页码
+            let maxPage = 1;
+            let pageElems = doc.querySelectorAll(".member-page a");
+            for (let a of pageElems) {
+                let text = (a.text || "").trim();
+                let n = parseInt(text);
+                if (!isNaN(n) && n > maxPage) maxPage = n;
+            }
+            return { comics: comics, maxPage: maxPage };
+        },
+    };
 }
