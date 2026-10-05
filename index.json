@@ -17,12 +17,14 @@
     "fileName": "jmcomic.js",
     "key": "jmx",
     "version": "2.1.0"
+    "description": "🔞"
   },
   {
-    "name": "漫画源04",
-    "fileName": "source_04.js",
-    "key": "source_04",
-    "version": "1.0.0"
+    "name": "鸟鸟韩漫",
+    "fileName": "nnhm.js",
+    "key": "nnhm",
+    "version": "1.3.0"
+    "description": "🔞"
   },
   {
     "name": "漫画源05",
