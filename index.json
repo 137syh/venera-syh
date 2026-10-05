@@ -16,14 +16,14 @@
     "name": "Jmcomic",
     "fileName": "jmcomic.js",
     "key": "jmx",
-    "version": "2.1.0"
+    "version": "2.1.0",
     "description": "H"
   },
   {
     "name": "鸟鸟韩漫",
     "fileName": "nnhm.js",
     "key": "nnhm",
-    "version": "1.3.0"
+    "version": "1.3.0",
     "description": "H"
   },
   {
@@ -34,8 +34,8 @@
   },
   {
     "name": "漫画源06",
-    "url": "",
-    "key": "",
+    "fileName": "source_06.js",
+    "key": "source_06",
     "version": "1.0.0"
   },
   {
