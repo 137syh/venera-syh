@@ -13,10 +13,10 @@
     "description": "H"
   },
   {
-    "name": "漫画源03",
-    "fileName": "source_03.js",
-    "key": "source_03",
-    "version": "1.0.0"
+    "name": "Jmcomic",
+    "fileName": "jmcomic.js",
+    "key": "jmx",
+    "version": "2.1.0"
   },
   {
     "name": "漫画源04",
