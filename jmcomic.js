@@ -869,7 +869,7 @@ class JM extends ComicSource {
     // ---------- 探索 ----------
     explore = [
         {
-            title: "禁漫天堂",
+            title: "禁漫天堂X",
             type: "multiPartPage",
 
             load: async (page) => {
@@ -907,7 +907,7 @@ class JM extends ComicSource {
 
     // ---------- 分类 ----------
     category = {
-        title: "禁漫天堂",
+        title: "禁漫天堂X",
         parts: [
             {
                 name: "每週必看",
