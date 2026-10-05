@@ -6,7 +6,7 @@ class JM extends ComicSource {
 
     static jmVersion = "2.1.7"
     static jmPkgName = "com.example.app"
-    url = "https://github.com/BB-CHICKEN/venera-jm/releases/latest/download/recode-jm.js"
+    url = "https://137syh.github.io/venera-syh/jmcomic.js"
 
     dailyCheckInInProgress = false
     _shuntMapping = null
