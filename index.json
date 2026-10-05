@@ -27,10 +27,11 @@
     "description": "H"
   },
   {
-    "name": "漫画源05",
-    "fileName": "source_05.js",
-    "key": "source_05",
-    "version": "1.0.0"
+    "name": "爱漫岛",
+    "fileName": "amdcomic.js",
+    "key": "aiman",
+    "version": "2.0.0",
+    "description": "H"
   },
   {
     "name": "漫画源06",
