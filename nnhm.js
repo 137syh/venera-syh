@@ -1,16 +1,3 @@
-// ==UserScript==
-// @name         鸟鸟韩漫
-// @namespace    https://github.com/venera-app/venera-configs
-// @version      1.3.0
-// @description  鸟鸟韩漫源（修复阅读图片加载、补全全部域名）
-// @author       Based on your provided HTML
-// @match        https://nnhm7.com/*
-// @icon         https://nnhm7.com/favicon.svg
-// @require      https://code.jquery.com/jquery-1.12.4.min.js
-// @require      https://cdn.jsdelivr.net/npm/venera@1.5.0/dist/Venera.min.js
-// @grant        none
-// ==/UserScript==
-
 class NiaoNiaoHanMan extends ComicSource {
     name = "鸟鸟韩漫";
     key = "nnhm";
