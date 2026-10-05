@@ -504,7 +504,7 @@ class JM extends ComicSource {
     // ---------- 图片分流测速 ----------
     async testImageSpeed() {
         // 覆盖全部去重后的分流线路（服务端最多 10 个分流）
-        const MAX_OPTIONS = 9
+        const MAX_OPTIONS = 10
         const TEST_IMG_BASE = "/media/photos/209654/"
         const TEST_IMG_NAMES = ["00001.webp", "00002.webp", "00003.webp"]
         const IMG_TIMEOUT_MS = 5000
