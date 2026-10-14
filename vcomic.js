@@ -1,8 +1,8 @@
 class Vomicmh extends ComicSource {
 
-    name = "vomic漫"
+    name = "vcomic"
 
-    key = "vomic"
+    key = "vcomic"
 
     version = "1.2.0"
 
@@ -260,7 +260,7 @@ class Vomicmh extends ComicSource {
 
     explore = [
         {
-            title: "热门推荐",
+            title: "vcomic",
             type: "multiPartPage",
             load: async (page) => {
                 if (page > 1) return []
