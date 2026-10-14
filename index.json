@@ -34,10 +34,10 @@
     "description": "H"
   },
   {
-    "name": "漫画源06",
-    "fileName": "source_06.js",
-    "key": "source_06",
-    "version": "1.0.0"
+    "name": "vcomic",
+    "fileName": "vcomic.js",
+    "key": "vcomic",
+    "version": "1.2.0"
   },
   {
     "name": "漫画源07",
