@@ -24,7 +24,7 @@
     "fileName": "nnhm.js",
     "key": "nnhm",
     "version": "1.3.0",
-    "description": "H"
+    "description": "H   可能需要梯子"
   },
   {
     "name": "爱漫岛",
@@ -34,9 +34,9 @@
     "description": "H"
   },
   {
-    "name": "vcomic",
-    "fileName": "vcomic.js",
-    "key": "vcomic",
+    "name": "vomic",
+    "fileName": "vomic.js",
+    "key": "vomic",
     "version": "1.2.0"
   },
   {
