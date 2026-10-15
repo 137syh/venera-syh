@@ -1,8 +1,8 @@
 class Vomicmh extends ComicSource {
 
-    name = "vcomic"
+    name = "vomic"
 
-    key = "vcomic"
+    key = "vomic"
 
     version = "1.2.0"
 
@@ -260,7 +260,7 @@ class Vomicmh extends ComicSource {
 
     explore = [
         {
-            title: "vcomic",
+            title: "vomic",
             type: "multiPartPage",
             load: async (page) => {
                 if (page > 1) return []
